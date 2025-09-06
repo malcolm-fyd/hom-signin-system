@@ -59,6 +59,19 @@
         </div>
     </div>
     
+    <!-- Terms and Conditions Modal -->
+    <div id="terms-modal" class="modal">
+        <div class="bg-white p-6 rounded-xl shadow-lg w-11/12 md:w-1/2 lg:w-1/3">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 text-center">Terms and Conditions</h2>
+            <div id="terms-content" class="text-sm text-gray-600 space-y-3 overflow-y-auto max-h-96">
+                <p>Loading terms...</p>
+            </div>
+            <button id="accept-terms-btn" class="mt-6 w-full bg-indigo-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-indigo-700 transition duration-300">
+                Accept and Sign In
+            </button>
+        </div>
+    </div>
+
     <!-- Loading Spinner -->
     <div id="loading" class="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50 hidden">
         <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
@@ -68,7 +81,8 @@
     <header class="w-full max-w-4xl text-center mb-6">
         <div class="flex justify-center mb-4">
             <!-- Placeholder for your logo -->
-            <img src="logo.png" alt="Company Logo" class="rounded-lg shadow-md" />
+            <img src="https://placehold.co/150x60/d4d4d8/27272a?text=LOGO" alt="Company Logo"
+                class="rounded-lg shadow-md" />
         </div>
         <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800">Building Access Log</h1>
         <p class="mt-2 text-gray-500">Trades Sign-in and Sign-out for safety compliance.</p>
@@ -133,6 +147,11 @@
         const loadingSpinner = document.getElementById('loading');
         const messageModal = document.getElementById('message-modal');
         const modalContent = document.getElementById('modal-content');
+        const termsModal = document.getElementById('terms-modal');
+        const termsContent = document.getElementById('terms-content');
+        const acceptTermsBtn = document.getElementById('accept-terms-btn');
+
+        let pendingSignInData = null; // Store form data temporarily
 
         const showMessage = (message) => {
             modalContent.innerHTML = `<p class="text-lg font-semibold">${message}</p>`;
@@ -239,6 +258,35 @@
             }
         };
 
+        const handleAcceptAndSignIn = async () => {
+            if (!pendingSignInData) return;
+
+            termsModal.style.display = 'none';
+            showLoading();
+
+            try {
+                const response = await fetch(`${WORKER_URL}/api/signin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(pendingSignInData)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showMessage(`You have been successfully signed in.`);
+                    signInForm.reset();
+                } else {
+                    throw new Error(result.error || 'Sign in failed.');
+                }
+            } catch (error) {
+                console.error("Error signing in:", error);
+                showMessage("An error occurred. Could not record your entry.");
+            } finally {
+                pendingSignInData = null; // Clear pending data
+                hideLoading();
+                fetchLogs();
+            }
+        };
+
         // Event Listeners
         signInForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -253,30 +301,28 @@
                 return;
             }
 
-            showLoading();
+            // Store data and show terms
+            pendingSignInData = { businessName, personName, mobileNumber, jobInfo };
 
+            showLoading();
             try {
-                const response = await fetch(`${WORKER_URL}/api/signin`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ businessName, personName, mobileNumber, jobInfo })
-                });
-                const result = await response.json();
-                if (result.success) {
-                    showMessage(`You have been successfully signed in.`);
-                    signInForm.reset();
-                } else {
-                    throw new Error(result.error || 'Sign in failed.');
+                const response = await fetch('/terms.txt'); // Assumes terms.txt is in the same directory
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch terms. Status: ${response.status}`);
                 }
+                const termsText = await response.text();
+                termsContent.innerHTML = `<pre class="whitespace-pre-wrap">${termsText}</pre>`;
+                termsModal.style.display = 'flex';
             } catch (error) {
-                console.error("Error signing in:", error);
-                showMessage("An error occurred. Could not record your entry.");
+                console.error("Error fetching terms:", error);
+                showMessage("Could not load terms and conditions. Please try again later.");
             } finally {
                 hideLoading();
-                // Force a log refresh
-                fetchLogs();
             }
         });
+
+        acceptTermsBtn.addEventListener('click', handleAcceptAndSignIn);
+
 
         // Initial setup and polling
         fetchLogs();
