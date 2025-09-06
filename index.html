@@ -97,7 +97,7 @@
         </div>
 
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Currently Signed In</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Daily Log</h2>
             <div class="scroll-container bg-gray-50 p-4 rounded-xl border border-gray-200">
                 <div id="log-display" class="space-y-4">
                     <p class="text-center text-gray-500">Loading...</p>
@@ -129,7 +129,7 @@
         <p>
             © 2025 OchreOnline. All rights reserved.
             <span class="mx-2">|</span>
-            Version 0.1.5
+            Version 0.1.
         </p>
     </footer>
 
@@ -159,7 +159,7 @@
 
         const fetchLogs = async () => {
             try {
-                const response = await fetch(`${WORKER_URL}/api/logs`);
+                const response = await fetch(`${WORKER_URL}/api/logs/daily`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -173,23 +173,35 @@
 
         const renderLog = (logs) => {
             logDisplay.innerHTML = '';
-            const signedInLogs = logs.filter(log => log.status === 'in');
-            if (signedInLogs.length === 0) {
-                logDisplay.innerHTML = `<p class="text-center text-gray-500 p-4">No one is currently signed in.</p>`;
+            if (logs.length === 0) {
+                logDisplay.innerHTML = `<p class="text-center text-gray-500 p-4">No transactions for today.</p>`;
                 return;
             }
 
-            signedInLogs.forEach(log => {
+            logs.forEach(log => {
+                const isSignedOut = !!log.signOutTime;
+                const statusColor = isSignedOut ? 'text-green-600' : 'text-blue-600';
+                const statusText = isSignedOut ? 'Signed Out' : 'Signed In';
+                const signTime = new Date(log.signInTime).toLocaleString();
+                const signOutTime = isSignedOut ? new Date(log.signOutTime).toLocaleString() : 'N/A';
+                
                 const logCard = `
                     <div class="bg-white p-4 rounded-xl shadow border border-gray-100 flex items-center justify-between">
                         <div>
                             <p class="text-lg font-bold">${log.personName}</p>
                             <p class="text-sm text-gray-600"><strong>${log.businessName}</strong> - ${log.jobInfo}</p>
-                            <p class="text-xs text-gray-400">Signed in: ${new Date(log.signInTime).toLocaleString()}</p>
+                            <p class="text-xs text-gray-400">
+                                <span class="${statusColor} font-bold">${statusText}</span>
+                                <span class="mx-1">•</span>
+                                <span class="text-gray-500">In: ${signTime}</span>
+                                ${isSignedOut ? `<span class="mx-1">•</span><span class="text-gray-500">Out: ${signOutTime}</span>` : ''}
+                            </p>
                         </div>
-                        <button onclick="signOut(${log.id})" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition-colors shadow-sm">
-                            Sign Out
-                        </button>
+                        ${!isSignedOut ? `
+                            <button onclick="signOut(${log.id})" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition-colors shadow-sm">
+                                Sign Out
+                            </button>
+                        ` : ''}
                     </div>
                 `;
                 logDisplay.innerHTML += logCard;
