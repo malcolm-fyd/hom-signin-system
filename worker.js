@@ -1,11 +1,3 @@
-// This Cloudflare Worker acts as the backend API for the sign-in app.
-// It uses a Cloudflare D1 database to store and retrieve log entries.
-
-// IMPORTANT: Before deploying this worker, you must
-// 1. Create a D1 database in your Cloudflare dashboard.
-// 2. Add the D1 binding to this worker in your `wrangler.toml` file or web UI.
-//    The binding name must be "DB".
-
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
@@ -14,59 +6,96 @@ export default {
 
         const headers = {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*', // Allows requests from any origin
+            'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Allow-Headers': 'Content-Type'
         };
 
-        if (method === 'OPTIONS') {
+        if (request.method === 'OPTIONS') {
             return new Response(null, { headers });
         }
 
-        try {
-            switch (path) {
-                case '/api/signin':
-                    if (method !== 'POST') return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers });
+        const router = {
+            '/api/signin': async () => {
+                if (method !== 'POST') {
+                    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers });
+                }
+                const { businessName, personName, mobileNumber, jobInfo } = await request.json();
+                const signInTime = new Date().toISOString();
+                const status = 'in';
+
+                try {
+                    const { success } = await env.DB.prepare(
+                        `INSERT INTO trades_log (businessName, personName, mobileNumber, jobInfo, status, signInTime, signOutTime) VALUES (?, ?, ?, ?, ?, ?, ?)`
+                    ).bind(businessName, personName, mobileNumber, jobInfo, status, signInTime, null).run();
+
+                    return new Response(JSON.stringify({ success, id: success.lastInsertRowid }), { headers });
+                } catch (e) {
+                    console.error('Sign-in error:', e);
+                    return new Response(JSON.stringify({ success: false, error: e.message }), { status: 500, headers });
+                }
+            },
+
+            '/api/signout': async () => {
+                if (method !== 'POST') {
+                    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers });
+                }
+                const { id } = await request.json();
+                const signOutTime = new Date().toISOString();
+
+                try {
+                    const { success } = await env.DB.prepare(
+                        `UPDATE trades_log SET status = 'out', signOutTime = ? WHERE id = ?`
+                    ).bind(signOutTime, id).run();
                     
-                    const signInData = await request.json();
-                    const { businessName, personName, mobileNumber, jobInfo } = signInData;
-                    const signInTime = new Date().toISOString();
-                    const status = 'in';
+                    if (success) {
+                        return new Response(JSON.stringify({ success: true }), { headers });
+                    } else {
+                        return new Response(JSON.stringify({ success: false, error: 'Log entry not found' }), { status: 404, headers });
+                    }
+                } catch (e) {
+                    console.error('Sign-out error:', e);
+                    return new Response(JSON.stringify({ success: false, error: e.message }), { status: 500, headers });
+                }
+            },
 
-                    const insertStatement = env.DB.prepare(
-                        'INSERT INTO trades_log (businessName, personName, mobileNumber, jobInfo, status, signInTime) VALUES (?, ?, ?, ?, ?, ?)'
-                    );
-                    await insertStatement.bind(businessName, personName, mobileNumber, jobInfo, status, signInTime).run();
+            '/api/logs': async () => {
+                const results = await env.DB.prepare(
+                    `SELECT id, businessName, personName, mobileNumber, jobInfo, status, signInTime, signOutTime FROM trades_log ORDER BY signInTime DESC`
+                ).all();
 
-                    return new Response(JSON.stringify({ success: true, message: 'Signed in successfully.' }), { status: 200, headers });
-                
-                case '/api/signout':
-                    if (method !== 'POST') return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers });
-                    
-                    const signOutData = await request.json();
-                    const { id } = signOutData;
-                    const signOutTime = new Date().toISOString();
-                    const signOutStatus = 'out';
+                return new Response(JSON.stringify(results), { headers });
+            },
 
-                    const updateStatement = env.DB.prepare(
-                        'UPDATE trades_log SET signOutTime = ?, status = ? WHERE id = ?'
-                    );
-                    await updateStatement.bind(signOutTime, signOutStatus, id).run();
+            '/api/report': async () => {
+                const startDate = url.searchParams.get('startDate');
+                const endDate = url.searchParams.get('endDate');
 
-                    return new Response(JSON.stringify({ success: true, message: 'Signed out successfully.' }), { status: 200, headers });
+                if (!startDate || !endDate) {
+                    return new Response(JSON.stringify({ error: 'Start date and end date are required' }), { status: 400, headers });
+                }
 
-                case '/api/logs':
-                    if (method !== 'GET') return new Response(JSON.stringify({ error: 'Method Not Allowed' }), { status: 405, headers });
+                try {
+                    const results = await env.DB.prepare(
+                        `SELECT id, businessName, personName, mobileNumber, jobInfo, status, signInTime, signOutTime
+                         FROM trades_log
+                         WHERE signOutTime IS NULL AND DATE(signInTime) BETWEEN ? AND ?
+                         ORDER BY signInTime ASC`
+                    ).bind(startDate, endDate).all();
 
-                    const { results } = await env.DB.prepare('SELECT * FROM trades_log ORDER BY signInTime DESC').all();
+                    return new Response(JSON.stringify(results), { headers });
+                } catch (e) {
+                    console.error('Report error:', e);
+                    return new Response(JSON.stringify({ success: false, error: e.message }), { status: 500, headers });
+                }
+            },
+        };
 
-                    return new Response(JSON.stringify({ success: true, results }), { status: 200, headers });
-
-                default:
-                    return new Response(JSON.stringify({ error: 'Not Found' }), { status: 404, headers });
-            }
-        } catch (error) {
-            return new Response(JSON.stringify({ error: error.message }), { status: 500, headers });
+        const routeHandler = router[path];
+        if (routeHandler) {
+            return routeHandler();
         }
-    }
+
+        return new Response(JSON.stringify({ error: 'Not Found' }), { status: 404, headers });
+    },
 };
