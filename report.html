@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unsigned Out Report</title>
+    <title>Trades Log Report</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -47,8 +47,8 @@
         <div class="flex justify-center mb-4">
             <img src="my-logo.png" alt="Company Logo" class="rounded-lg shadow-md" />
         </div>
-        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800">Unsigned-Out Report</h1>
-        <p class="mt-2 text-gray-500">Filter and view entries that have not been signed out.</p>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800">Trades Log Report</h1>
+        <p class="mt-2 text-gray-500">Filter and view all log entries by date range.</p>
     </header>
 
     <main class="w-full max-w-4xl bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
@@ -79,7 +79,7 @@
         <p>
             © 2025 OchreOnline. All rights reserved.
             <span class="mx-2">|</span>
-            Version 0.1.1
+            Version 0.1.2
         </p>
     </footer>
 
@@ -112,7 +112,7 @@
                 const data = await response.json();
 
                 if (data.results.length === 0) {
-                    reportResults.innerHTML = `<p class="text-center text-gray-500 p-4">No unsigned-out entries found for this date range.</p>`;
+                    reportResults.innerHTML = `<p class="text-center text-gray-500 p-4">No entries found for this date range.</p>`;
                     return;
                 }
 
@@ -124,8 +124,8 @@
                                     <th class="p-4">Business</th>
                                     <th class="p-4">Person</th>
                                     <th class="p-4">Mobile</th>
-                                    <th class="p-4">Job Info</th>
                                     <th class="p-4">Signed In</th>
+                                    <th class="p-4">Signed Out</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -133,13 +133,15 @@
                 
                 data.results.forEach(log => {
                     const signInDate = new Date(log.signInTime);
+                    const signOutDate = log.signOutTime ? new Date(log.signOutTime) : null;
+                    const signOutDisplay = signOutDate ? signOutDate.toLocaleString() : 'N/A';
                     html += `
                         <tr class="border-t border-gray-200 hover:bg-gray-50">
                             <td class="p-4 text-sm text-gray-700">${log.businessName}</td>
                             <td class="p-4 text-sm text-gray-700">${log.personName}</td>
                             <td class="p-4 text-sm text-gray-700">${log.mobileNumber}</td>
-                            <td class="p-4 text-sm text-gray-700">${log.jobInfo}</td>
                             <td class="p-4 text-sm text-gray-700">${signInDate.toLocaleString()}</td>
+                            <td class="p-4 text-sm text-gray-700">${signOutDisplay}</td>
                         </tr>
                     `;
                 });
