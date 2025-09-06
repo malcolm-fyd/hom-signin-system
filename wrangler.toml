@@ -1,4 +1,4 @@
-name = "trades-log-worker"
+name = "hom-sign-in-system"
 main = "worker.js"
 compatibility_date = "2023-01-01"
 
