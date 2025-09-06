@@ -14,7 +14,10 @@ export default {
                 ).bind(businessName, personName, mobileNumber, jobInfo, status, signInTime).run();
 
                 return new Response(JSON.stringify({ success: true }), {
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
                 });
             }
 
@@ -28,7 +31,10 @@ export default {
                 ).bind(status, signOutTime, id).run();
 
                 return new Response(JSON.stringify({ success: true }), {
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
                 });
             }
 
@@ -39,7 +45,10 @@ export default {
                             `SELECT * FROM trades_log WHERE status = 'in' ORDER BY signInTime DESC`
                         ).all();
                         return new Response(JSON.stringify({ results: signedInLogs }), {
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*' 
+                            },
                         });
 
                     case '/api/logs/daily':
@@ -48,7 +57,10 @@ export default {
                             `SELECT * FROM trades_log WHERE SUBSTR(signInTime, 1, 10) = ? ORDER BY signInTime DESC`
                         ).bind(today).all();
                         return new Response(JSON.stringify({ results: dailyLogs }), {
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                         });
 
                     case '/api/report':
@@ -61,7 +73,10 @@ export default {
                         ).bind(startDate, endDate).all();
 
                         return new Response(JSON.stringify({ results: reportResults }), {
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                         });
 
                     case '/api/report/all':
@@ -69,9 +84,12 @@ export default {
                             `SELECT * FROM trades_log ORDER BY signInTime DESC`
                         ).all();
                         return new Response(JSON.stringify({ results: allLogs }), {
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
                         });
-
+                    
                     default:
                         return new Response(JSON.stringify({ error: 'Not Found' }), { status: 404 });
                 }
