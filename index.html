@@ -13,7 +13,7 @@
         }
 
         .scroll-container {
-            max-height: 400px;
+            max-height: 50vh;
             overflow-y: auto;
             scrollbar-width: thin;
             scrollbar-color: #cbd5e1 #f8fafc;
@@ -32,318 +32,253 @@
             border-radius: 4px;
         }
 
-        /* Custom Modal CSS */
-        .modal {
-            display: none;
+        .modal-overlay {
             position: fixed;
-            z-index: 1000;
-            left: 0;
             top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 50;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
         }
     </style>
 </head>
 
-<body class="p-6 md:p-10 flex flex-col items-center">
-
-    <!-- Modal for messages -->
-    <div id="message-modal" class="modal">
-        <div class="bg-white p-6 rounded-xl shadow-lg w-11/12 md:w-1/2 lg:w-1/3">
-            <div id="modal-content" class="text-center"></div>
-            <button onclick="document.getElementById('message-modal').style.display='none'"
-                class="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-indigo-700 transition duration-300">Close</button>
-        </div>
-    </div>
-    
-    <!-- Terms and Conditions Modal -->
-    <div id="terms-modal" class="modal">
-        <div class="bg-white p-6 rounded-xl shadow-lg w-11/12 md:w-1/2 lg:w-1/3">
-            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 text-center">Terms and Conditions</h2>
-            <div id="terms-content" class="text-sm text-gray-600 space-y-3 overflow-y-auto max-h-96">
-                <p>Loading terms...</p>
-            </div>
-            <div class="flex space-x-4 mt-6">
-                <button id="decline-terms-btn" class="flex-1 w-full bg-red-500 text-white py-2 px-4 rounded-full font-semibold hover:bg-red-600 transition duration-300">
-                    Decline
-                </button>
-                <button id="accept-terms-btn" class="flex-1 w-full bg-indigo-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-indigo-700 transition duration-300">
-                    Accept and Sign In
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Loading Spinner -->
-    <div id="loading" class="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50 hidden">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
-
-    <!-- Header & Logo -->
+<body class="p-4 flex flex-col items-center min-h-screen">
     <header class="w-full max-w-4xl text-center mb-6">
-        <div class="flex justify-center mb-4">
-            <!-- Your logo -->
-            <img src="my-logo.png" alt="Company Logo" class="rounded-lg shadow-md" />
-        </div>
-        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800">Building Access Log</h1>
-        <p class="mt-2 text-gray-500">Trades Sign-in and Sign-out for safety compliance.</p>
-        <p id="user-info" class="text-xs text-gray-400 mt-2 break-all">Connecting to server...</p>
+        <img src="my-logo.png" alt="Company Logo" class="rounded-lg shadow-md mx-auto" />
     </header>
 
-    <main class="w-full max-w-4xl bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
-
-        <!-- Sign-in Form -->
-        <form id="sign-in-form" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <main class="w-full max-w-4xl flex-grow flex flex-col gap-8">
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 text-center mb-6">Trades Sign In/Out</h1>
+            <form id="sign-in-form" class="space-y-4">
                 <div>
-                    <label for="business-name" class="block text-sm font-medium text-gray-700">Business Name</label>
-                    <input type="text" id="business-name" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <label for="businessName" class="block text-sm font-medium text-gray-700">Business Name</label>
+                    <input type="text" id="businessName" name="businessName"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
                 </div>
                 <div>
-                    <label for="person-name" class="block text-sm font-medium text-gray-700">Person's Name</label>
-                    <input type="text" id="person-name" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="contact-number" class="block text-sm font-medium text-gray-700">Mobile Number</label>
-                    <input type="tel" id="contact-number" required pattern="[0-9]{10}" title="Please enter a 10-digit mobile number"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <label for="personName" class="block text-sm font-medium text-gray-700">Person Name</label>
+                    <input type="text" id="personName" name="personName"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
                 </div>
                 <div>
-                    <label for="job-info" class="block text-sm font-medium text-gray-700">Job Information</label>
-                    <input type="text" id="job-info" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                    <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number</label>
+                    <input type="tel" id="mobileNumber" name="mobileNumber" pattern="[0-9]{10}"
+                        title="Mobile number must be 10 digits"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
                 </div>
-            </div>
+                <div>
+                    <label for="jobInfo" class="block text-sm font-medium text-gray-700">Job Information</label>
+                    <input type="text" id="jobInfo" name="jobInfo"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
+                        required>
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-lg transition-all transform hover:scale-105">
+                    Sign In
+                </button>
+            </form>
+            <div id="message-box" class="mt-4 p-3 hidden text-sm font-medium rounded-md text-center"></div>
+        </div>
 
-            <button type="submit"
-                class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-full shadow-md hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:scale-105">
-                Sign In
-            </button>
-        </form>
-
-        <hr class="my-8 border-gray-200">
-
-        <!-- Log Display -->
-        <div class="scroll-container bg-gray-50 p-4 rounded-xl border border-gray-200">
-            <div id="log-display" class="space-y-4">
-                <p class="text-center text-gray-500">Loading log data...</p>
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Currently Signed In</h2>
+            <div class="scroll-container bg-gray-50 p-4 rounded-xl border border-gray-200">
+                <div id="log-display" class="space-y-4">
+                    <p class="text-center text-gray-500">Loading...</p>
+                </div>
             </div>
         </div>
-        
     </main>
 
-    <!-- Footer for ownership and version -->
+    <div id="terms-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4">Terms and Conditions</h2>
+            <div id="terms-text" class="h-64 overflow-y-auto mb-4 p-4 border rounded-md">
+                Loading terms and conditions...
+            </div>
+            <div class="flex justify-end space-x-4">
+                <button id="decline-button"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-all">
+                    Decline
+                </button>
+                <button id="accept-button"
+                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-lg transition-all">
+                    Accept
+                </button>
+            </div>
+        </div>
+    </div>
+
     <footer class="w-full max-w-4xl mt-6 text-center text-gray-400 text-sm">
         <p>
             © 2025 OchreOnline. All rights reserved.
             <span class="mx-2">|</span>
-            Version 0.1.3
+            Version 0.1.2
         </p>
-        <div class="mt-2">
-            <a href="report.html" class="text-indigo-600 hover:text-indigo-800 transition duration-300">View Unsigned-Out Report</a>
-        </div>
     </footer>
 
     <script>
         // *** IMPORTANT: REPLACE THIS WITH YOUR DEPLOYED WORKER'S BASE URL ***
-        // Example: "https://trades-log-worker.yourname.workers.dev"
         const WORKER_URL = "https://hom-sign-in-system.malcolm-164.workers.dev";
 
-        // UI elements
         const signInForm = document.getElementById('sign-in-form');
         const logDisplay = document.getElementById('log-display');
-        const userInfo = document.getElementById('user-info');
-        const loadingSpinner = document.getElementById('loading');
-        const messageModal = document.getElementById('message-modal');
-        const modalContent = document.getElementById('modal-content');
+        const messageBox = document.getElementById('message-box');
+
         const termsModal = document.getElementById('terms-modal');
-        const termsContent = document.getElementById('terms-content');
-        const acceptTermsBtn = document.getElementById('accept-terms-btn');
-        const declineTermsBtn = document.getElementById('decline-terms-btn');
+        const termsTextContainer = document.getElementById('terms-text');
+        const acceptButton = document.getElementById('accept-button');
+        const declineButton = document.getElementById('decline-button');
+        let pendingFormData = null;
 
-        let pendingSignInData = null; // Store form data temporarily
-
-        const showMessage = (message) => {
-            modalContent.innerHTML = `<p class="text-lg font-semibold">${message}</p>`;
-            messageModal.style.display = 'flex';
-        };
-
-        const showLoading = () => loadingSpinner.classList.remove('hidden');
-        const hideLoading = () => loadingSpinner.classList.add('hidden');
-
-        // Fetch logs from the worker every 5 seconds (polling)
-        const fetchLogs = async () => {
-            try {
-                showLoading();
-                const response = await fetch(`${WORKER_URL}/api/logs`);
-                const logs = await response.json();
-                renderLog(logs.results);
-            } catch (error) {
-                console.error("Error fetching logs:", error);
-                showMessage("Failed to load logs from server. Please check the worker URL.");
-            } finally {
-                hideLoading();
+        const showMessage = (message, isError = false) => {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            if (isError) {
+                messageBox.classList.add('bg-red-100', 'text-red-700');
+            } else {
+                messageBox.classList.add('bg-green-100', 'text-green-700');
             }
         };
 
-        // Render functions
-        const renderLog = (logs) => {
-            // Filter logs to only show those that are still signed in
-            const activeLogs = logs.filter(log => log.status === 'in');
+        const fetchLogs = async () => {
+            try {
+                const response = await fetch(`${WORKER_URL}/api/logs`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                renderLog(data.results);
+            } catch (error) {
+                console.error("Failed to load logs from server. Please check the worker URL.", error);
+                logDisplay.innerHTML = `<p class="text-center text-red-500">Failed to load logs. Please check the worker URL.</p>`;
+            }
+        };
 
+        const renderLog = (logs) => {
             logDisplay.innerHTML = '';
-            if (activeLogs.length === 0) {
+            if (logs.length === 0) {
                 logDisplay.innerHTML = `<p class="text-center text-gray-500 p-4">No one is currently signed in.</p>`;
                 return;
             }
 
-            // Sort logs by sign-in time (newest first)
-            activeLogs.sort((a, b) => new Date(b.signInTime) - new Date(a.signInTime));
-
-            activeLogs.forEach(log => {
-                const statusColor = 'bg-green-100 text-green-800';
-                
-                // Add a sign-out button
-                const signOutButton = `<button data-id="${log.id}" class="sign-out-btn ml-4 px-4 py-1 text-sm bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-300">Sign Out</button>`;
-
+            logs.forEach(log => {
                 const logCard = `
-                    <div class="bg-white p-4 rounded-xl shadow border border-gray-100">
-                        <div class="flex justify-between items-center mb-2">
-                            <div class="flex items-center">
-                                <h3 class="font-bold text-lg">${log.personName}</h3>
-                                ${signOutButton}
-                            </div>
-                            <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusColor}">Signed In</span>
+                    <div class="bg-white p-4 rounded-xl shadow border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-lg font-bold">${log.personName}</p>
+                            <p class="text-sm text-gray-600"><strong>${log.businessName}</strong> - ${log.jobInfo}</p>
+                            <p class="text-xs text-gray-400">Signed in: ${new Date(log.signInTime).toLocaleString()}</p>
                         </div>
-                        <p class="text-sm text-gray-600"><strong>Business:</strong> ${log.businessName}</p>
-                        <p class="text-sm text-gray-600"><strong>Job:</strong> ${log.jobInfo}</p>
-                        <p class="text-sm text-gray-600"><strong>Contact:</strong> ${log.mobileNumber}</p>
-                        <div class="mt-2 text-sm text-gray-400">
-                            <span>In: ${new Date(log.signInTime).toLocaleTimeString()}</span>
-                        </div>
+                        <button onclick="signOut(${log.id})" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition-colors shadow-sm">
+                            Sign Out
+                        </button>
                     </div>
                 `;
                 logDisplay.innerHTML += logCard;
             });
-
-            // Attach event listeners to the new sign-out buttons
-            document.querySelectorAll('.sign-out-btn').forEach(button => {
-                button.addEventListener('click', handleSignOut);
-            });
         };
 
-        const handleSignOut = async (e) => {
-            const docId = e.target.dataset.id;
-            if (!docId) {
-                showMessage("Could not find log entry to sign out.");
-                return;
-            }
-            showLoading();
+        const signOut = async (id) => {
             try {
                 const response = await fetch(`${WORKER_URL}/api/signout`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: docId })
+                    body: JSON.stringify({ id }),
                 });
-                const result = await response.json();
-                if (result.success) {
-                    showMessage("You have been successfully signed out.");
-                } else {
-                    throw new Error(result.error || 'Sign out failed.');
+
+                if (!response.ok) {
+                    throw new Error('Sign out failed');
                 }
+
+                showMessage('Successfully signed out!');
+                fetchLogs(); // Refresh the log display
             } catch (error) {
-                console.error("Error signing out:", error);
-                showMessage("An error occurred. Could not record your sign-out.");
-            } finally {
-                hideLoading();
-                // Force a log refresh
-                fetchLogs();
+                console.error('Sign out error:', error);
+                showMessage('Sign out failed. Please try again.', true);
             }
         };
 
-        const handleAcceptAndSignIn = async () => {
-            if (!pendingSignInData) return;
+        const fetchTermsAndShowModal = async () => {
+            try {
+                const response = await fetch('terms.txt');
+                const terms = await response.text();
+                termsTextContainer.textContent = terms;
+                termsModal.classList.remove('hidden');
+            } catch (error) {
+                console.error("Failed to load terms and conditions:", error);
+                termsTextContainer.textContent = "Failed to load terms. Please check your network connection.";
+            }
+        };
 
-            termsModal.style.display = 'none';
-            showLoading();
-
+        const handleSignIn = async (formData) => {
             try {
                 const response = await fetch(`${WORKER_URL}/api/signin`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(pendingSignInData)
+                    body: JSON.stringify(formData),
                 });
-                const result = await response.json();
-                if (result.success) {
-                    showMessage(`You have been successfully signed in.`);
-                    signInForm.reset();
-                } else {
-                    throw new Error(result.error || 'Sign in failed.');
-                }
-            } catch (error) {
-                console.error("Error signing in:", error);
-                showMessage("An error occurred. Could not record your entry.");
-            } finally {
-                pendingSignInData = null; // Clear pending data
-                hideLoading();
-                fetchLogs();
-            }
-        };
 
-        const handleDeclineTerms = () => {
-            termsModal.style.display = 'none';
-            pendingSignInData = null; // Clear pending data
-            showMessage("You must accept the terms and conditions to sign in.");
-        };
-
-        // Event Listeners
-        signInForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const businessName = document.getElementById('business-name').value.trim();
-            const personName = document.getElementById('person-name').value.trim();
-            const mobileNumber = document.getElementById('contact-number').value.trim();
-            const jobInfo = document.getElementById('job-info').value.trim();
-
-            const mobileNumberRegex = /^[0-9]{10}$/;
-            if (!mobileNumberRegex.test(mobileNumber)) {
-                showMessage("Please enter a valid 10-digit mobile number.");
-                return;
-            }
-
-            // Store data and show terms
-            pendingSignInData = { businessName, personName, mobileNumber, jobInfo };
-
-            showLoading();
-            try {
-                const response = await fetch('/terms.txt'); // Assumes terms.txt is in the same directory
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch terms. Status: ${response.status}`);
+                    throw new Error('Sign in failed');
                 }
-                const termsText = await response.text();
-                termsContent.innerHTML = `<pre class="whitespace-pre-wrap">${termsText}</pre>`;
-                termsModal.style.display = 'flex';
+
+                showMessage('Successfully signed in!');
+                signInForm.reset();
+                fetchLogs(); // Refresh the log display
             } catch (error) {
-                console.error("Error fetching terms:", error);
-                showMessage("Could not load terms and conditions. Please try again later.");
-            } finally {
-                hideLoading();
+                console.error('Sign in error:', error);
+                showMessage('Sign in failed. Please try again.', true);
+            }
+        };
+
+        signInForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = {
+                businessName: e.target.businessName.value,
+                personName: e.target.personName.value,
+                mobileNumber: e.target.mobileNumber.value,
+                jobInfo: e.target.jobInfo.value,
+            };
+            pendingFormData = formData;
+            fetchTermsAndShowModal();
+        });
+
+        acceptButton.addEventListener('click', () => {
+            termsModal.classList.add('hidden');
+            if (pendingFormData) {
+                handleSignIn(pendingFormData);
+                pendingFormData = null;
             }
         });
 
-        acceptTermsBtn.addEventListener('click', handleAcceptAndSignIn);
-        declineTermsBtn.addEventListener('click', handleDeclineTerms);
+        declineButton.addEventListener('click', () => {
+            termsModal.classList.add('hidden');
+            pendingFormData = null;
+            showMessage('Sign-in declined.', true);
+        });
 
-
-        // Initial setup and polling
+        // Initial log fetch
         fetchLogs();
-        setInterval(fetchLogs, 5000); // Poll for new logs every 5 seconds
     </script>
 </body>
 
