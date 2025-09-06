@@ -97,11 +97,11 @@
         </div>
 
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl font-bold text-gray-800">Daily Log</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">Currently Signed In</h2>
                 <a href="report.html"
-                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-all text-sm">
-                    Reports
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-all">
+                    Report
                 </a>
             </div>
             <div class="scroll-container bg-gray-50 p-4 rounded-xl border border-gray-200">
@@ -140,13 +140,10 @@
     </footer>
 
     <script>
-        // *** IMPORTANT: REPLACE THIS WITH YOUR DEPLOYED WORKER'S BASE URL ***
         const WORKER_URL = "https://hom-sign-in-system.malcolm-164.workers.dev";
-
         const signInForm = document.getElementById('sign-in-form');
         const logDisplay = document.getElementById('log-display');
         const messageBox = document.getElementById('message-box');
-
         const termsModal = document.getElementById('terms-modal');
         const termsTextContainer = document.getElementById('terms-text');
         const acceptButton = document.getElementById('accept-button');
@@ -165,7 +162,7 @@
 
         const fetchLogs = async () => {
             try {
-                const response = await fetch(`${WORKER_URL}/api/logs/daily`);
+                const response = await fetch(`${WORKER_URL}/api/logs`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -180,34 +177,21 @@
         const renderLog = (logs) => {
             logDisplay.innerHTML = '';
             if (logs.length === 0) {
-                logDisplay.innerHTML = `<p class="text-center text-gray-500 p-4">No transactions for today.</p>`;
+                logDisplay.innerHTML = `<p class="text-center text-gray-500 p-4">No one is currently signed in.</p>`;
                 return;
             }
 
             logs.forEach(log => {
-                const isSignedOut = !!log.signOutTime;
-                const statusColor = isSignedOut ? 'text-green-600' : 'text-blue-600';
-                const statusText = isSignedOut ? 'Signed Out' : 'Signed In';
-                const signTime = new Date(log.signInTime).toLocaleString();
-                const signOutTime = isSignedOut ? new Date(log.signOutTime).toLocaleString() : 'N/A';
-                
                 const logCard = `
                     <div class="bg-white p-4 rounded-xl shadow border border-gray-100 flex items-center justify-between">
                         <div>
                             <p class="text-lg font-bold">${log.personName}</p>
                             <p class="text-sm text-gray-600"><strong>${log.businessName}</strong> - ${log.jobInfo}</p>
-                            <p class="text-xs text-gray-400">
-                                <span class="${statusColor} font-bold">${statusText}</span>
-                                <span class="mx-1">•</span>
-                                <span class="text-gray-500">In: ${signTime}</span>
-                                ${isSignedOut ? `<span class="mx-1">•</span><span class="text-gray-500">Out: ${signOutTime}</span>` : ''}
-                            </p>
+                            <p class="text-xs text-gray-400">Signed in: ${new Date(log.signInTime).toLocaleString()}</p>
                         </div>
-                        ${!isSignedOut ? `
-                            <button onclick="signOut(${log.id})" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition-colors shadow-sm">
-                                Sign Out
-                            </button>
-                        ` : ''}
+                        <button onclick="signOut(${log.id})" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition-colors shadow-sm">
+                            Sign Out
+                        </button>
                     </div>
                 `;
                 logDisplay.innerHTML += logCard;
@@ -293,7 +277,6 @@
             showMessage('Sign-in declined.', true);
         });
 
-        // Initial log fetch
         fetchLogs();
     </script>
 </body>
