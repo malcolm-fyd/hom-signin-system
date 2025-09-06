@@ -1,0 +1,8 @@
+name = "trades-log-worker"
+main = "worker.js"
+compatibility_date = "2023-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "hom-sign-in-system"
+database_id = "627eb2aa-9116-46fe-a640-02783a140320"
