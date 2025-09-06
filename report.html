@@ -4,281 +4,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trades Sign-in</title>
+    <title>Unsigned Out Report</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .scroll-container {
-            max-height: 50vh;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 #f8fafc;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
         }
 
-        .scroll-container::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .scroll-container::-webkit-scrollbar-track {
-            background: #f8fafc;
-        }
-
-        .scroll-container::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        .modal-overlay {
+        .modal {
+            display: none;
             position: fixed;
-            top: 0;
+            z-index: 1000;
             left: 0;
+            top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
+            background-color: rgba(0, 0, 0, 0.4);
             justify-content: center;
             align-items: center;
-            z-index: 50;
-        }
-
-        .modal-content {
-            background-color: #fff;
-            padding: 2.5rem;
-            border-radius: 1rem;
-            width: 90%;
-            max-width: 600px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            position: relative;
         }
     </style>
 </head>
 
-<body class="p-4 flex flex-col items-center min-h-screen bg-gray-100">
-    <header class="w-full max-w-4xl text-center mb-6">
-        <img src="my-logo.png" alt="Company Logo" class="rounded-lg shadow-md mx-auto" />
-    </header>
+<body class="p-6 md:p-10 flex flex-col items-center">
 
-    <main class="w-full max-w-4xl flex-grow flex flex-col gap-8">
-        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
-            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 text-center mb-6">Trades Sign In/Out</h1>
-            <form id="sign-in-form" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="businessName" class="block text-sm font-medium text-gray-700">Business Name</label>
-                        <input type="text" id="businessName" name="businessName"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
-                            required>
-                    </div>
-                    <div>
-                        <label for="personName" class="block text-sm font-medium text-gray-700">Person Name</label>
-                        <input type="text" id="personName" name="personName"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
-                            required>
-                    </div>
-                    <div>
-                        <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number</label>
-                        <input type="tel" id="mobileNumber" name="mobileNumber" pattern="[0-9]{10}"
-                            title="Mobile number must be 10 digits"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
-                            required>
-                    </div>
-                    <div>
-                        <label for="jobInfo" class="block text-sm font-medium text-gray-700">Job Information</label>
-                        <input type="text" id="jobInfo" name="jobInfo"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
-                            required>
-                    </div>
-                </div>
-                <button type="submit"
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-lg transition-all transform hover:scale-105">
-                    Sign In
-                </button>
-            </form>
-            <div id="message-box" class="mt-4 p-3 hidden text-sm font-medium rounded-md text-center"></div>
-        </div>
-
-        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-2xl font-bold text-gray-800">Currently Signed In</h2>
-                <a href="report.html"
-                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-all">
-                    Report
-                </a>
-            </div>
-            <div class="scroll-container bg-gray-50 p-4 rounded-xl border border-gray-200">
-                <div id="log-display" class="space-y-4">
-                    <p class="text-center text-gray-500">Loading...</p>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <div id="terms-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h2 class="text-2xl font-bold mb-4">Terms and Conditions</h2>
-            <div id="terms-text" class="h-64 overflow-y-auto mb-4 p-4 border rounded-md">
-                Loading terms and conditions...
-            </div>
-            <div class="flex justify-end space-x-4">
-                <button id="decline-button"
-                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-all">
-                    Decline
-                </button>
-                <button id="accept-button"
-                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-lg transition-all">
-                    Accept
-                </button>
-            </div>
+    <!-- Modal for messages -->
+    <div id="message-modal" class="modal">
+        <div class="bg-white p-6 rounded-xl shadow-lg w-11/12 md:w-1/2 lg:w-1/3">
+            <div id="modal-content" class="text-center"></div>
+            <button onclick="document.getElementById('message-modal').style.display='none'"
+                class="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-indigo-700 transition duration-300">Close</button>
         </div>
     </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50 hidden">
+        <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+
+    <header class="w-full max-w-4xl text-center mb-6">
+        <div class="flex justify-center mb-4">
+            <img src="my-logo.png" alt="Company Logo" class="rounded-lg shadow-md" />
+        </div>
+        <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800">Unsigned-Out Report</h1>
+        <p class="mt-2 text-gray-500">Filter and view entries that have not been signed out.</p>
+    </header>
+
+    <main class="w-full max-w-4xl bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
+        <form id="report-form" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="start-date" class="block text-sm font-medium text-gray-700">Start Date</label>
+                    <input type="date" id="start-date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border">
+                </div>
+                <div>
+                    <label for="end-date" class="block text-sm font-medium text-gray-700">End Date</label>
+                    <input type="date" id="end-date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border">
+                </div>
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-full shadow-md hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:scale-105">
+                Generate Report
+            </button>
+        </form>
+
+        <hr class="my-8 border-gray-200">
+
+        <div id="report-results" class="space-y-4">
+            <p class="text-center text-gray-500">Select a date range and click 'Generate Report' to view results.</p>
+        </div>
+    </main>
 
     <footer class="w-full max-w-4xl mt-6 text-center text-gray-400 text-sm">
         <p>
             © 2025 OchreOnline. All rights reserved.
             <span class="mx-2">|</span>
-            Version 0.1.
+            Version 0.1.1
         </p>
     </footer>
 
     <script>
         const WORKER_URL = "https://hom-sign-in-system.malcolm-164.workers.dev";
-        const signInForm = document.getElementById('sign-in-form');
-        const logDisplay = document.getElementById('log-display');
-        const messageBox = document.getElementById('message-box');
-        const termsModal = document.getElementById('terms-modal');
-        const termsTextContainer = document.getElementById('terms-text');
-        const acceptButton = document.getElementById('accept-button');
-        const declineButton = document.getElementById('decline-button');
-        let pendingFormData = null;
+        const reportForm = document.getElementById('report-form');
+        const reportResults = document.getElementById('report-results');
+        const loadingSpinner = document.getElementById('loading');
+        const messageModal = document.getElementById('message-modal');
+        const modalContent = document.getElementById('modal-content');
 
-        const showMessage = (message, isError = false) => {
-            messageBox.textContent = message;
-            messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
-            if (isError) {
-                messageBox.classList.add('bg-red-100', 'text-red-700');
-            } else {
-                messageBox.classList.add('bg-green-100', 'text-green-700');
-            }
+        const showMessage = (message) => {
+            modalContent.innerHTML = `<p class="text-lg font-semibold">${message}</p>`;
+            messageModal.style.display = 'flex';
         };
 
-        const fetchLogs = async () => {
+        const showLoading = () => loadingSpinner.classList.remove('hidden');
+        const hideLoading = () => loadingSpinner.classList.add('hidden');
+
+        reportForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+
+            showLoading();
+            reportResults.innerHTML = '';
+            
             try {
-                const response = await fetch(`${WORKER_URL}/api/logs`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                const response = await fetch(`${WORKER_URL}/api/report?startDate=${startDate}&endDate=${endDate}`);
                 const data = await response.json();
-                renderLog(data.results);
-            } catch (error) {
-                console.error("Failed to load logs from server. Please check the worker URL.", error);
-                logDisplay.innerHTML = `<p class="text-center text-red-500">Failed to load logs. Please check the worker URL.</p>`;
-            }
-        };
 
-        const renderLog = (logs) => {
-            logDisplay.innerHTML = '';
-            if (logs.length === 0) {
-                logDisplay.innerHTML = `<p class="text-center text-gray-500 p-4">No one is currently signed in.</p>`;
-                return;
-            }
+                if (data.results.length === 0) {
+                    reportResults.innerHTML = `<p class="text-center text-gray-500 p-4">No unsigned-out entries found for this date range.</p>`;
+                    return;
+                }
 
-            logs.forEach(log => {
-                const logCard = `
-                    <div class="bg-white p-4 rounded-xl shadow border border-gray-100 flex items-center justify-between">
-                        <div>
-                            <p class="text-lg font-bold">${log.personName}</p>
-                            <p class="text-sm text-gray-600"><strong>${log.businessName}</strong> - ${log.jobInfo}</p>
-                            <p class="text-xs text-gray-400">Signed in: ${new Date(log.signInTime).toLocaleString()}</p>
-                        </div>
-                        <button onclick="signOut(${log.id})" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition-colors shadow-sm">
-                            Sign Out
-                        </button>
+                let html = `
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white rounded-lg shadow-sm border border-gray-200">
+                            <thead class="bg-gray-100">
+                                <tr class="text-left text-gray-600 text-sm font-semibold">
+                                    <th class="p-4">Business</th>
+                                    <th class="p-4">Person</th>
+                                    <th class="p-4">Mobile</th>
+                                    <th class="p-4">Job Info</th>
+                                    <th class="p-4">Signed In</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                data.results.forEach(log => {
+                    const signInDate = new Date(log.signInTime);
+                    html += `
+                        <tr class="border-t border-gray-200 hover:bg-gray-50">
+                            <td class="p-4 text-sm text-gray-700">${log.businessName}</td>
+                            <td class="p-4 text-sm text-gray-700">${log.personName}</td>
+                            <td class="p-4 text-sm text-gray-700">${log.mobileNumber}</td>
+                            <td class="p-4 text-sm text-gray-700">${log.jobInfo}</td>
+                            <td class="p-4 text-sm text-gray-700">${signInDate.toLocaleString()}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                            </tbody>
+                        </table>
                     </div>
                 `;
-                logDisplay.innerHTML += logCard;
-            });
-        };
+                reportResults.innerHTML = html;
 
-        const signOut = async (id) => {
-            try {
-                const response = await fetch(`${WORKER_URL}/api/signout`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id }),
-                });
-
-                if (!response.ok) {
-                    throw new Error('Sign out failed');
-                }
-
-                showMessage('Successfully signed out!');
-                fetchLogs(); // Refresh the log display
             } catch (error) {
-                console.error('Sign out error:', error);
-                showMessage('Sign out failed. Please try again.', true);
-            }
-        };
-
-        const fetchTermsAndShowModal = async () => {
-            try {
-                const response = await fetch('terms.txt');
-                const terms = await response.text();
-                termsTextContainer.textContent = terms;
-                termsModal.classList.remove('hidden');
-            } catch (error) {
-                console.error("Failed to load terms and conditions:", error);
-                termsTextContainer.textContent = "Failed to load terms. Please check your network connection.";
-            }
-        };
-
-        const handleSignIn = async (formData) => {
-            try {
-                const response = await fetch(`${WORKER_URL}/api/signin`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData),
-                });
-
-                if (!response.ok) {
-                    throw new Error('Sign in failed');
-                }
-
-                showMessage('Successfully signed in!');
-                signInForm.reset();
-                fetchLogs(); // Refresh the log display
-            } catch (error) {
-                console.error('Sign in error:', error);
-                showMessage('Sign in failed. Please try again.', true);
-            }
-        };
-
-        signInForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const formData = {
-                businessName: e.target.businessName.value,
-                personName: e.target.personName.value,
-                mobileNumber: e.target.mobileNumber.value,
-                jobInfo: e.target.jobInfo.value,
-            };
-            pendingFormData = formData;
-            fetchTermsAndShowModal();
-        });
-
-        acceptButton.addEventListener('click', () => {
-            termsModal.classList.add('hidden');
-            if (pendingFormData) {
-                handleSignIn(pendingFormData);
-                pendingFormData = null;
+                console.error("Error generating report:", error);
+                showMessage("Failed to generate report. Please check the worker URL.");
+            } finally {
+                hideLoading();
             }
         });
-
-        declineButton.addEventListener('click', () => {
-            termsModal.classList.add('hidden');
-            pendingFormData = null;
-            showMessage('Sign-in declined.', true);
-        });
-
-        fetchLogs();
     </script>
-</body>
 
+</body>
 </html>
