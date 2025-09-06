@@ -2,15 +2,15 @@ TERMS OF ACCESS
 Purpose of Sign-In: This sign-in system is for the safety and security of all personnel and visitors within the building. 
 Your information is collected for emergency and compliance purposes.
 
-Data Collection: By signing in, you consent to the collection and storage of your name, business, mobile number, and job information. 
-This data will be used solely for safety and site management purposes.
-
-Privacy: We are committed to protecting your privacy. Your information will not be shared with third parties, except in the event of an emergency or as required by law.
-
-On-Site Conduct: While on site, you agree to adhere to all company safety protocols and site rules. Failure to comply may result in removal from the premises.
+On-Site Conduct: While on site, you agree to adhere to all OH&S safety protocols and site rules. Failure to comply may result in your removal from the premises.
 
 Sign-Out: You are required to sign out upon your departure. This ensures an accurate record of who is on site at all times for safety and security.
 
-Disclaimer: The company is not liable for any personal injury, loss, or damage to property that may occur on the premises. Access is granted at your own risk.
+Disclaimer: The site is not liable for any personal injury, loss, or damage to property that may occur on the premises. Access is granted at your own risk.
+
+Data Collection: By signing in, you consent to the collection and storage of your name, business, mobile number, and job information. This data will be used solely for safety and site management purposes.
+
+Privacy: We are committed to protecting your privacy. Your information will not be shared with third parties, except in the event of an emergency or as required by law.
 
 By clicking "Accept and Sign In," you acknowledge that you have read, understood, and agree to these terms and conditions.
+
