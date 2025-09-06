@@ -61,30 +61,32 @@
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
             <h1 class="text-2xl md:text-3xl font-bold text-gray-800 text-center mb-6">Trades Sign In/Out</h1>
             <form id="sign-in-form" class="space-y-4">
-                <div>
-                    <label for="businessName" class="block text-sm font-medium text-gray-700">Business Name</label>
-                    <input type="text" id="businessName" name="businessName"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
-                        required>
-                </div>
-                <div>
-                    <label for="personName" class="block text-sm font-medium text-gray-700">Person Name</label>
-                    <input type="text" id="personName" name="personName"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
-                        required>
-                </div>
-                <div>
-                    <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number</label>
-                    <input type="tel" id="mobileNumber" name="mobileNumber" pattern="[0-9]{10}"
-                        title="Mobile number must be 10 digits"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
-                        required>
-                </div>
-                <div>
-                    <label for="jobInfo" class="block text-sm font-medium text-gray-700">Job Information</label>
-                    <input type="text" id="jobInfo" name="jobInfo"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
-                        required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="businessName" class="block text-sm font-medium text-gray-700">Business Name</label>
+                        <input type="text" id="businessName" name="businessName"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
+                            required>
+                    </div>
+                    <div>
+                        <label for="personName" class="block text-sm font-medium text-gray-700">Person Name</label>
+                        <input type="text" id="personName" name="personName"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
+                            required>
+                    </div>
+                    <div>
+                        <label for="mobileNumber" class="block text-sm font-medium text-gray-700">Mobile Number</label>
+                        <input type="tel" id="mobileNumber" name="mobileNumber" pattern="[0-9]{10}"
+                            title="Mobile number must be 10 digits"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
+                            required>
+                    </div>
+                    <div>
+                        <label for="jobInfo" class="block text-sm font-medium text-gray-700">Job Information</label>
+                        <input type="text" id="jobInfo" name="jobInfo"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 border focus:ring-indigo-500 focus:border-indigo-500"
+                            required>
+                    </div>
                 </div>
                 <button type="submit"
                     class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md shadow-lg transition-all transform hover:scale-105">
@@ -95,16 +97,17 @@
         </div>
 
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl font-bold text-gray-800">Currently Signed In</h2>
-                <a href="report.html" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-colors shadow-sm">
-                    Report
-                </a>
-            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Currently Signed In</h2>
             <div class="scroll-container bg-gray-50 p-4 rounded-xl border border-gray-200">
                 <div id="log-display" class="space-y-4">
                     <p class="text-center text-gray-500">Loading...</p>
                 </div>
+            </div>
+            <div class="mt-4 text-center">
+                <a href="report.html"
+                    class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md shadow-sm transition-all transform hover:scale-105">
+                    View Report
+                </a>
             </div>
         </div>
     </main>
@@ -137,10 +140,13 @@
     </footer>
 
     <script>
+        // *** IMPORTANT: REPLACE THIS WITH YOUR DEPLOYED WORKER'S BASE URL ***
         const WORKER_URL = "https://hom-sign-in-system.malcolm-164.workers.dev";
+
         const signInForm = document.getElementById('sign-in-form');
         const logDisplay = document.getElementById('log-display');
         const messageBox = document.getElementById('message-box');
+
         const termsModal = document.getElementById('terms-modal');
         const termsTextContainer = document.getElementById('terms-text');
         const acceptButton = document.getElementById('accept-button');
@@ -208,7 +214,7 @@
                 }
 
                 showMessage('Successfully signed out!');
-                fetchLogs();
+                fetchLogs(); // Refresh the log display
             } catch (error) {
                 console.error('Sign out error:', error);
                 showMessage('Sign out failed. Please try again.', true);
@@ -241,7 +247,7 @@
 
                 showMessage('Successfully signed in!');
                 signInForm.reset();
-                fetchLogs();
+                fetchLogs(); // Refresh the log display
             } catch (error) {
                 console.error('Sign in error:', error);
                 showMessage('Sign in failed. Please try again.', true);
