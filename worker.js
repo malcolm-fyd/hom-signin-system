@@ -69,7 +69,7 @@ export default {
                         const endDate = searchParams.get('endDate');
 
                         const { results: reportResults } = await env.DB.prepare(
-                            `SELECT * FROM trades_log WHERE status = 'in' AND date(signInTime) BETWEEN ? AND ? ORDER BY signInTime DESC`
+                            `SELECT * FROM trades_log WHERE date(signInTime) BETWEEN ? AND ? ORDER BY signInTime DESC`
                         ).bind(startDate, endDate).all();
 
                         return new Response(JSON.stringify({ results: reportResults }), {
