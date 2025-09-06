@@ -127,7 +127,7 @@
         <p>
             © 2025 OchreOnline. All rights reserved.
             <span class="mx-2">|</span>
-            Version 0.1.2
+            Version 0.1.5
         </p>
     </footer>
 
@@ -171,12 +171,13 @@
 
         const renderLog = (logs) => {
             logDisplay.innerHTML = '';
-            if (logs.length === 0) {
+            const signedInLogs = logs.filter(log => log.status === 'in');
+            if (signedInLogs.length === 0) {
                 logDisplay.innerHTML = `<p class="text-center text-gray-500 p-4">No one is currently signed in.</p>`;
                 return;
             }
 
-            logs.forEach(log => {
+            signedInLogs.forEach(log => {
                 const logCard = `
                     <div class="bg-white p-4 rounded-xl shadow border border-gray-100 flex items-center justify-between">
                         <div>
