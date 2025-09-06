@@ -9,7 +9,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
+            background-color: #f1f5e9;
         }
 
         .scroll-container {
@@ -66,9 +66,14 @@
             <div id="terms-content" class="text-sm text-gray-600 space-y-3 overflow-y-auto max-h-96">
                 <p>Loading terms...</p>
             </div>
-            <button id="accept-terms-btn" class="mt-6 w-full bg-indigo-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-indigo-700 transition duration-300">
-                Accept and Sign In
-            </button>
+            <div class="flex space-x-4 mt-6">
+                <button id="decline-terms-btn" class="flex-1 w-full bg-red-500 text-white py-2 px-4 rounded-full font-semibold hover:bg-red-600 transition duration-300">
+                    Decline
+                </button>
+                <button id="accept-terms-btn" class="flex-1 w-full bg-indigo-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-indigo-700 transition duration-300">
+                    Accept and Sign In
+                </button>
+            </div>
         </div>
     </div>
 
@@ -161,6 +166,7 @@
         const termsModal = document.getElementById('terms-modal');
         const termsContent = document.getElementById('terms-content');
         const acceptTermsBtn = document.getElementById('accept-terms-btn');
+        const declineTermsBtn = document.getElementById('decline-terms-btn');
 
         let pendingSignInData = null; // Store form data temporarily
 
@@ -189,29 +195,23 @@
 
         // Render functions
         const renderLog = (logs) => {
-            const now = new Date();
-            const todayLogs = logs.filter(log => {
-                if (!log.signInTime) return false;
-                const signInDate = new Date(log.signInTime);
-                return signInDate.toDateString() === now.toDateString();
-            });
+            // Filter logs to only show those that are still signed in
+            const activeLogs = logs.filter(log => log.status === 'in');
 
             logDisplay.innerHTML = '';
-            if (todayLogs.length === 0) {
-                logDisplay.innerHTML = `<p class="text-center text-gray-500 p-4">No entries to display for today.</p>`;
+            if (activeLogs.length === 0) {
+                logDisplay.innerHTML = `<p class="text-center text-gray-500 p-4">No one is currently signed in.</p>`;
                 return;
             }
 
             // Sort logs by sign-in time (newest first)
-            todayLogs.sort((a, b) => new Date(b.signInTime) - new Date(a.signInTime));
+            activeLogs.sort((a, b) => new Date(b.signInTime) - new Date(a.signInTime));
 
-            todayLogs.forEach(log => {
-                const statusColor = log.status === 'in' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-                const signOutText = log.signOutTime ? `<span class="text-xs text-gray-500">Out: ${new Date(log.signOutTime).toLocaleTimeString()}</span>` : '';
+            activeLogs.forEach(log => {
+                const statusColor = 'bg-green-100 text-green-800';
                 
-                // Add a sign-out button if the person is currently signed in
-                const signOutButton = log.status === 'in' ? 
-                    `<button data-id="${log.id}" class="sign-out-btn ml-4 px-4 py-1 text-sm bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-300">Sign Out</button>` : '';
+                // Add a sign-out button
+                const signOutButton = `<button data-id="${log.id}" class="sign-out-btn ml-4 px-4 py-1 text-sm bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-300">Sign Out</button>`;
 
                 const logCard = `
                     <div class="bg-white p-4 rounded-xl shadow border border-gray-100">
@@ -220,14 +220,13 @@
                                 <h3 class="font-bold text-lg">${log.personName}</h3>
                                 ${signOutButton}
                             </div>
-                            <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusColor}">${log.status === 'in' ? 'Signed In' : 'Signed Out'}</span>
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold ${statusColor}">Signed In</span>
                         </div>
                         <p class="text-sm text-gray-600"><strong>Business:</strong> ${log.businessName}</p>
                         <p class="text-sm text-gray-600"><strong>Job:</strong> ${log.jobInfo}</p>
                         <p class="text-sm text-gray-600"><strong>Contact:</strong> ${log.mobileNumber}</p>
                         <div class="mt-2 text-sm text-gray-400">
                             <span>In: ${new Date(log.signInTime).toLocaleTimeString()}</span>
-                            ${signOutText}
                         </div>
                     </div>
                 `;
@@ -298,6 +297,12 @@
             }
         };
 
+        const handleDeclineTerms = () => {
+            termsModal.style.display = 'none';
+            pendingSignInData = null; // Clear pending data
+            showMessage("You must accept the terms and conditions to sign in.");
+        };
+
         // Event Listeners
         signInForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -333,6 +338,7 @@
         });
 
         acceptTermsBtn.addEventListener('click', handleAcceptAndSignIn);
+        declineTermsBtn.addEventListener('click', handleDeclineTerms);
 
 
         // Initial setup and polling
