@@ -3,6 +3,16 @@ export default {
         const url = new URL(request.url);
 
         try {
+            if (request.method === 'OPTIONS') {
+                return new Response(null, {
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                    },
+                });
+            }
+
             if (request.method === 'POST' && url.pathname === '/api/signin') {
                 const { businessName, personName, mobileNumber, jobInfo } = await request.json();
                 const signInTime = new Date().toISOString();
