@@ -12,43 +12,76 @@
             background-color: #f1f5f9;
         }
 
-        .modal {
-            display: none;
+        .scroll-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 #f8fafc;
+        }
+
+        .scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scroll-container::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+
+        .scroll-container::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .modal-overlay {
             position: fixed;
-            z-index: 1000;
-            left: 0;
             top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 50;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            padding: 2.5rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
         }
     </style>
 </head>
 
 <body class="p-6 md:p-10 flex flex-col items-center">
 
-    <!-- Modal for messages -->
-    <div id="message-modal" class="modal">
-        <div class="bg-white p-6 rounded-xl shadow-lg w-11/12 md:w-1/2 lg:w-1/3">
-            <div id="modal-content" class="text-center"></div>
-            <button onclick="document.getElementById('message-modal').style.display='none'"
-                class="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-full font-semibold hover:bg-indigo-700 transition duration-300">Close</button>
-        </div>
-    </div>
-
     <!-- Loading Spinner -->
     <div id="loading" class="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50 hidden">
         <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
     </div>
 
-    <header class="w-full max-w-4xl text-center mb-6">
-        <div class="flex justify-center mb-4">
-            <img src="my-logo.png" alt="Company Logo" class="rounded-lg shadow-md" />
+    <!-- Modal for messages -->
+    <div id="message-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold mb-4">Report Generation</h2>
+            <div id="modal-content-message" class="text-center mb-4"></div>
+            <div class="flex justify-end">
+                <button onclick="document.getElementById('message-modal').classList.add('hidden')"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-all">
+                    Close
+                </button>
+            </div>
         </div>
+    </div>
+
+    <header class="w-full max-w-4xl text-center mb-6">
+        <img src="my-logo.png" alt="Company Logo" class="rounded-lg shadow-md mx-auto mb-4" />
         <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800">Trades Log Report</h1>
-        <p class="mt-2 text-gray-500">Filter and view all log entries by date range.</p>
+        <p class="mt-2 text-gray-500">Filter and view all sign-in and sign-out entries.</p>
     </header>
 
     <main class="w-full max-w-4xl bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
@@ -56,22 +89,27 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="start-date" class="block text-sm font-medium text-gray-700">Start Date</label>
-                    <input type="date" id="start-date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border">
+                    <input type="date" id="start-date" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border">
                 </div>
                 <div>
                     <label for="end-date" class="block text-sm font-medium text-gray-700">End Date</label>
-                    <input type="date" id="end-date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border">
+                    <input type="date" id="end-date" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 border">
                 </div>
             </div>
-            <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-full shadow-md hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:scale-105">
+            <button type="submit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md shadow-lg transition-all transform hover:scale-105">
                 Generate Report
             </button>
         </form>
 
         <hr class="my-8 border-gray-200">
 
-        <div id="report-results" class="space-y-4">
-            <p class="text-center text-gray-500">Select a date range and click 'Generate Report' to view results.</p>
+        <div class="scroll-container bg-gray-50 p-4 rounded-xl border border-gray-200">
+            <div id="report-results" class="space-y-4">
+                <p class="text-center text-gray-500 p-4">Select a date range and click 'Generate Report' to view results.</p>
+            </div>
         </div>
     </main>
 
@@ -89,11 +127,11 @@
         const reportResults = document.getElementById('report-results');
         const loadingSpinner = document.getElementById('loading');
         const messageModal = document.getElementById('message-modal');
-        const modalContent = document.getElementById('modal-content');
+        const modalContent = document.getElementById('modal-content-message');
 
         const showMessage = (message) => {
             modalContent.innerHTML = `<p class="text-lg font-semibold">${message}</p>`;
-            messageModal.style.display = 'flex';
+            messageModal.classList.remove('hidden');
         };
 
         const showLoading = () => loadingSpinner.classList.remove('hidden');
@@ -104,11 +142,19 @@
             const startDate = document.getElementById('start-date').value;
             const endDate = document.getElementById('end-date').value;
 
+            if (!startDate || !endDate) {
+                showMessage("Please select both a start and end date.");
+                return;
+            }
+
             showLoading();
             reportResults.innerHTML = '';
-            
+
             try {
                 const response = await fetch(`${WORKER_URL}/api/report?startDate=${startDate}&endDate=${endDate}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 const data = await response.json();
 
                 if (data.results.length === 0) {
@@ -124,34 +170,36 @@
                                     <th class="p-4">Business</th>
                                     <th class="p-4">Person</th>
                                     <th class="p-4">Mobile</th>
+                                    <th class="p-4">Job Info</th>
                                     <th class="p-4">Signed In</th>
                                     <th class="p-4">Signed Out</th>
                                 </tr>
                             </thead>
                             <tbody>
                 `;
-                
+
                 data.results.forEach(log => {
                     const signInDate = new Date(log.signInTime);
-                    const signOutDate = log.signOutTime ? new Date(log.signOutTime) : null;
-                    const signOutDisplay = signOutDate ? signOutDate.toLocaleString() : 'N/A';
+                    const signOutTime = log.signOutTime ? new Date(log.signOutTime).toLocaleString() : 'N/A';
                     html += `
                         <tr class="border-t border-gray-200 hover:bg-gray-50">
                             <td class="p-4 text-sm text-gray-700">${log.businessName}</td>
                             <td class="p-4 text-sm text-gray-700">${log.personName}</td>
                             <td class="p-4 text-sm text-gray-700">${log.mobileNumber}</td>
+                            <td class="p-4 text-sm text-gray-700">${log.jobInfo}</td>
                             <td class="p-4 text-sm text-gray-700">${signInDate.toLocaleString()}</td>
-                            <td class="p-4 text-sm text-gray-700">${signOutDisplay}</td>
+                            <td class="p-4 text-sm text-gray-700">${signOutTime}</td>
                         </tr>
                     `;
                 });
-                
+
                 html += `
                             </tbody>
                         </table>
                     </div>
                 `;
                 reportResults.innerHTML = html;
+                showMessage("Report generation complete!");
 
             } catch (error) {
                 console.error("Error generating report:", error);
@@ -163,4 +211,5 @@
     </script>
 
 </body>
+
 </html>
