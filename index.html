@@ -49,6 +49,11 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             position: relative;
         }
+        
+        /* New style to preserve text formatting */
+        #terms-text {
+            white-space: pre-wrap;
+        }
     </style>
 </head>
 
@@ -97,15 +102,17 @@
         </div>
 
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl font-bold text-gray-800">Currently Signed In</h2>
-                <a href="report.html"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition-all">Report</a>
-            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Currently Signed In</h2>
             <div class="scroll-container bg-gray-50 p-4 rounded-xl border border-gray-200">
                 <div id="log-display" class="space-y-4">
                     <p class="text-center text-gray-500">Loading...</p>
                 </div>
+            </div>
+            <div class="mt-4 text-center">
+                <a href="report.html"
+                    class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md shadow-sm transition-all transform hover:scale-105">
+                    View Report
+                </a>
             </div>
         </div>
     </main>
@@ -144,10 +151,12 @@
         const signInForm = document.getElementById('sign-in-form');
         const logDisplay = document.getElementById('log-display');
         const messageBox = document.getElementById('message-box');
+
         const termsModal = document.getElementById('terms-modal');
         const termsTextContainer = document.getElementById('terms-text');
         const acceptButton = document.getElementById('accept-button');
         const declineButton = document.getElementById('decline-button');
+        let pendingFormData = null;
 
         const showMessage = (message, isError = false) => {
             messageBox.textContent = message;
@@ -258,22 +267,21 @@
                 mobileNumber: e.target.mobileNumber.value,
                 jobInfo: e.target.jobInfo.value,
             };
+            pendingFormData = formData;
             fetchTermsAndShowModal();
         });
 
         acceptButton.addEventListener('click', () => {
-            const formData = {
-                businessName: document.getElementById('businessName').value,
-                personName: document.getElementById('personName').value,
-                mobileNumber: document.getElementById('mobileNumber').value,
-                jobInfo: document.getElementById('jobInfo').value,
-            };
             termsModal.classList.add('hidden');
-            handleSignIn(formData);
+            if (pendingFormData) {
+                handleSignIn(pendingFormData);
+                pendingFormData = null;
+            }
         });
 
         declineButton.addEventListener('click', () => {
             termsModal.classList.add('hidden');
+            pendingFormData = null;
             showMessage('Sign-in declined.', true);
         });
 
