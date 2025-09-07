@@ -121,4 +121,166 @@
                     class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition-all">
                     Decline
                 </button>
-                <button id="accept-button
+                <button id="accept-button"
+                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-lg transition-all">
+                    Accept
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="w-full max-w-4xl mt-6 text-center text-gray-400 text-sm">
+        <p>
+            © 2025 OchreOnline. All rights reserved.
+            <span class="mx-2">|</span>
+            Version 0.1.2
+        </p>
+    </footer>
+
+    <script>
+        // *** IMPORTANT: REPLACE THIS WITH YOUR DEPLOYED WORKER'S BASE URL ***
+        const WORKER_URL = "https://hom-sign-in-system.malcolm-164.workers.dev";
+
+        const signInForm = document.getElementById('sign-in-form');
+        const logDisplay = document.getElementById('log-display');
+        const messageBox = document.getElementById('message-box');
+
+        const termsModal = document.getElementById('terms-modal');
+        const termsTextContainer = document.getElementById('terms-text');
+        const acceptButton = document.getElementById('accept-button');
+        const declineButton = document.getElementById('decline-button');
+        let pendingFormData = null;
+
+        const showMessage = (message, isError = false) => {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+            if (isError) {
+                messageBox.classList.add('bg-red-100', 'text-red-700');
+            } else {
+                messageBox.classList.add('bg-green-100', 'text-green-700');
+            }
+        };
+
+        const fetchLogs = async () => {
+            try {
+                const response = await fetch(`${WORKER_URL}/api/logs`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                renderLog(data.results);
+            } catch (error) {
+                console.error("Failed to load logs from server. Please check the worker URL.", error);
+                logDisplay.innerHTML = `<p class="text-center text-red-500">Failed to load logs. Please check the worker URL.</p>`;
+            }
+        };
+
+        const renderLog = (logs) => {
+            logDisplay.innerHTML = '';
+            if (logs.length === 0) {
+                logDisplay.innerHTML = `<p class="text-center text-gray-500 p-4">No one is currently signed in.</p>`;
+                return;
+            }
+
+            logs.forEach(log => {
+                const logCard = `
+                    <div class="bg-white p-4 rounded-xl shadow border border-gray-100 flex items-center justify-between">
+                        <div>
+                            <p class="text-lg font-bold">${log.personName}</p>
+                            <p class="text-sm text-gray-600"><strong>${log.businessName}</strong> - ${log.jobInfo}</p>
+                            <p class="text-xs text-gray-400">Signed in: ${new Date(log.signInTime).toLocaleString()}</p>
+                        </div>
+                        <button onclick="signOut(${log.id})" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition-colors shadow-sm">
+                            Sign Out
+                        </button>
+                    </div>
+                `;
+                logDisplay.innerHTML += logCard;
+            });
+        };
+
+        const signOut = async (id) => {
+            try {
+                const response = await fetch(`${WORKER_URL}/api/signout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Sign out failed');
+                }
+
+                showMessage('Successfully signed out!');
+                fetchLogs(); // Refresh the log display
+            } catch (error) {
+                console.error('Sign out error:', error);
+                showMessage('Sign out failed. Please try again.', true);
+            }
+        };
+
+        const fetchTermsAndShowModal = async () => {
+            try {
+                const response = await fetch('terms.txt');
+                const terms = await response.text();
+                termsTextContainer.textContent = terms;
+                termsModal.classList.remove('hidden');
+            } catch (error) {
+                console.error("Failed to load terms and conditions:", error);
+                termsTextContainer.textContent = "Failed to load terms. Please check your network connection.";
+            }
+        };
+
+        const handleSignIn = async (formData) => {
+            try {
+                const response = await fetch(`${WORKER_URL}/api/signin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Sign in failed');
+                }
+
+                showMessage('Successfully signed in!');
+                signInForm.reset();
+                fetchLogs(); // Refresh the log display
+            } catch (error) {
+                console.error('Sign in error:', error);
+                showMessage('Sign in failed. Please try again.', true);
+            }
+        };
+
+        signInForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = {
+                businessName: e.target.businessName.value,
+                personName: e.target.personName.value,
+                mobileNumber: e.target.mobileNumber.value,
+                jobInfo: e.target.jobInfo.value,
+            };
+            pendingFormData = formData;
+            fetchTermsAndShowModal();
+        });
+
+        acceptButton.addEventListener('click', () => {
+            termsModal.classList.add('hidden');
+            if (pendingFormData) {
+                handleSignIn(pendingFormData);
+                pendingFormData = null;
+            }
+        });
+
+        declineButton.addEventListener('click', () => {
+            termsModal.classList.add('hidden');
+            pendingFormData = null;
+            showMessage('Sign-in declined.', true);
+        });
+
+        // Initial log fetch
+        fetchLogs();
+    </script>
+</body>
+
+</html>
