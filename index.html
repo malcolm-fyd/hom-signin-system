@@ -144,12 +144,10 @@
         const signInForm = document.getElementById('sign-in-form');
         const logDisplay = document.getElementById('log-display');
         const messageBox = document.getElementById('message-box');
-
         const termsModal = document.getElementById('terms-modal');
         const termsTextContainer = document.getElementById('terms-text');
         const acceptButton = document.getElementById('accept-button');
         const declineButton = document.getElementById('decline-button');
-        let pendingFormData = null;
 
         const showMessage = (message, isError = false) => {
             messageBox.textContent = message;
@@ -260,21 +258,22 @@
                 mobileNumber: e.target.mobileNumber.value,
                 jobInfo: e.target.jobInfo.value,
             };
-            pendingFormData = formData;
             fetchTermsAndShowModal();
         });
 
         acceptButton.addEventListener('click', () => {
+            const formData = {
+                businessName: document.getElementById('businessName').value,
+                personName: document.getElementById('personName').value,
+                mobileNumber: document.getElementById('mobileNumber').value,
+                jobInfo: document.getElementById('jobInfo').value,
+            };
             termsModal.classList.add('hidden');
-            if (pendingFormData) {
-                handleSignIn(pendingFormData);
-                pendingFormData = null;
-            }
+            handleSignIn(formData);
         });
 
         declineButton.addEventListener('click', () => {
             termsModal.classList.add('hidden');
-            pendingFormData = null;
             showMessage('Sign-in declined.', true);
         });
 
