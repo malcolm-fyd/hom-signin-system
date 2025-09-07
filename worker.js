@@ -1,29 +1,11 @@
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
-        const HOURS_OFFSET = 9.5; // ACST Australia is +9.5 hours
-        const UTC_OFFSET_MINUTES = HOURS_OFFSET * 60;
-
-        const getLocalTime = () => {
-            const now = new Date();
-            const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-            return new Date(utc + (UTC_OFFSET_MINUTES * 60000));
-        };
-
-        const formatDate = (date) => {
-            const year = date.getFullYear();
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const day = date.getDate().toString().padStart(2, '0');
-            const hours = date.getHours().toString().padStart(2, '0');
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            const seconds = date.getSeconds().toString().padStart(2, '0');
-            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-        };
 
         try {
             if (request.method === 'POST' && url.pathname === '/api/signin') {
                 const { businessName, personName, mobileNumber, jobInfo } = await request.json();
-                const signInTime = formatDate(getLocalTime());
+                const signInTime = new Date().toISOString();
                 const status = 'in';
 
                 await env.DB.prepare(
@@ -41,7 +23,7 @@ export default {
 
             if (request.method === 'POST' && url.pathname === '/api/signout') {
                 const { id } = await request.json();
-                const signOutTime = formatDate(getLocalTime());
+                const signOutTime = new Date().toISOString();
                 const status = 'out';
 
                 await env.DB.prepare(
@@ -69,16 +51,39 @@ export default {
                             },
                         });
 
+                    case '/api/logs/daily':
+                        const today = new Date().toISOString().slice(0, 10);
+                        const { results: dailyLogs } = await env.DB.prepare(
+                            `SELECT * FROM trades_log WHERE SUBSTR(signInTime, 1, 10) = ? ORDER BY signInTime DESC`
+                        ).bind(today).all();
+                        return new Response(JSON.stringify({ results: dailyLogs }), {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
+                        });
+
                     case '/api/report':
                         const { searchParams } = url;
                         const startDate = searchParams.get('startDate');
                         const endDate = searchParams.get('endDate');
 
                         const { results: reportResults } = await env.DB.prepare(
-                            `SELECT * FROM trades_log WHERE DATE(signInTime) BETWEEN ? AND ? ORDER BY signInTime DESC`
+                            `SELECT * FROM trades_log WHERE date(signInTime) BETWEEN ? AND ? ORDER BY signInTime DESC`
                         ).bind(startDate, endDate).all();
 
                         return new Response(JSON.stringify({ results: reportResults }), {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*'
+                            },
+                        });
+
+                    case '/api/report/all':
+                        const { results: allLogs } = await env.DB.prepare(
+                            `SELECT * FROM trades_log ORDER BY signInTime DESC`
+                        ).all();
+                        return new Response(JSON.stringify({ results: allLogs }), {
                             headers: {
                                 'Content-Type': 'application/json',
                                 'Access-Control-Allow-Origin': '*'
