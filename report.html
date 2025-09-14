@@ -7,6 +7,37 @@
     <title>Trades Log Report</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        .header {
+            position: relative;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header .btn-secondary {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 10px 20px;
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d0d0d0;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f1f5f9;
@@ -59,12 +90,10 @@
 
 <body class="p-6 md:p-10 flex flex-col items-center">
 
-    <!-- Loading Spinner -->
     <div id="loading" class="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-75 z-50 hidden">
         <div class="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
     </div>
 
-    <!-- Modal for messages -->
     <div id="message-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <h2 class="text-xl font-bold mb-4">Report Generation</h2>
@@ -78,10 +107,11 @@
         </div>
     </div>
 
-    <header class="w-full max-w-4xl text-center mb-6">
+    <header class="w-full max-w-4xl text-center mb-6 header">
         <img src="my-logo.png" alt="Company Logo" class="rounded-lg shadow-md mx-auto mb-4" />
         <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800">Trades Log Report</h1>
         <p class="mt-2 text-gray-500">Filter and view all sign-in and sign-out entries.</p>
+        <a href="index.html" class="btn-secondary" style="position: static; transform: none; margin-top: 1rem;">Return to Sign In</a>
     </header>
 
     <main class="w-full max-w-4xl bg-white p-6 md:p-8 rounded-2xl shadow-xl border border-gray-200">
@@ -128,6 +158,24 @@
         const loadingSpinner = document.getElementById('loading');
         const messageModal = document.getElementById('message-modal');
         const modalContent = document.getElementById('modal-content-message');
+        
+        let inactivityTimeout;
+        const inactivityDuration = 120000; // 2 minutes in milliseconds
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimeout);
+            inactivityTimeout = setTimeout(() => {
+                 window.location.href = "index.html";
+            }, inactivityDuration);
+        }
+
+        // Add event listeners to reset the timer on user activity
+        document.addEventListener('mousemove', resetInactivityTimer);
+        document.addEventListener('keypress', resetInactivityTimer);
+        document.addEventListener('touchstart', resetInactivityTimer);
+
+        // Initial timer start
+        resetInactivityTimer();
 
         const showMessage = (message) => {
             modalContent.innerHTML = `<p class="text-lg font-semibold">${message}</p>`;
