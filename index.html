@@ -7,6 +7,37 @@
     <title>Trades Sign-in</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        .header {
+            position: relative;
+            width: 100%;
+            text-align: center;
+        }
+
+        .header .btn-secondary {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 10px 20px;
+            margin: 0;
+            font-size: 0.9em;
+        }
+        
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d0d0d0;
+        }
+        
         .scroll-container {
             max-height: 50vh;
             overflow-y: auto;
@@ -58,8 +89,9 @@
 </head>
 
 <body class="p-4 flex flex-col items-center min-h-screen bg-gray-100">
-    <header class="w-full max-w-4xl text-center mb-6">
+    <header class="w-full max-w-4xl text-center mb-6 header">
         <img src="my-logo.png" alt="Company Logo" class="rounded-lg shadow-md mx-auto" />
+        <a href="https://index-page-275.pages.dev/" class="btn-secondary">Index / Services</a>
     </header>
 
     <main class="w-full max-w-4xl flex-grow flex flex-col gap-8">
@@ -157,6 +189,25 @@
         const acceptButton = document.getElementById('accept-button');
         const declineButton = document.getElementById('decline-button');
         let pendingFormData = null;
+        
+        let inactivityTimeout;
+        const inactivityDuration = 120000; // 2 minutes in milliseconds
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimeout);
+            inactivityTimeout = setTimeout(() => {
+                 window.location.href = "https://index-page-275.pages.dev/";
+            }, inactivityDuration);
+        }
+
+        // Add event listeners to reset the timer on user activity
+        document.addEventListener('mousemove', resetInactivityTimer);
+        document.addEventListener('keypress', resetInactivityTimer);
+        document.addEventListener('touchstart', resetInactivityTimer);
+
+        // Initial timer start
+        resetInactivityTimer();
+
 
         const showMessage = (message, isError = false) => {
             messageBox.textContent = message;
